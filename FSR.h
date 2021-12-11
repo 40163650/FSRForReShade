@@ -24,19 +24,6 @@ sampler BufferASampler
 
 //---------------------------------------------------------------------- FSR Buffer A (Output to be used in Main, should use s0 as input)
 
-/* EASU stage
-*
-* This takes a reduced resolution source, and scales it up while preserving detail.
-*
-* Updates:
-*   stretch definition fixed. Thanks nehon for the bug report!
-*/
-
-float3 FsrEasuCF(float2 p)
-{
-    return tex2D(s0, p).rgb;
-}
-
 /**** EASU ****/
 void FsrEasuCon(
     out float4 con0,
@@ -185,18 +172,18 @@ void FsrEasuF(
     float4 off = float4(-.5, .5, -.5, .5) * con1.xxyy;
     // textureGather to texture offsets
     // x=west y=east z=north w=south
-    float3 bC = FsrEasuCF(p0 + off.xw); float bL = mad(0.5, bC.r + bC.b, bC.g);
-    float3 cC = FsrEasuCF(p0 + off.yw); float cL = mad(0.5, cC.r + cC.b, cC.g);
-    float3 iC = FsrEasuCF(p1 + off.xw); float iL = mad(0.5, iC.r + iC.b, iC.g);
-    float3 jC = FsrEasuCF(p1 + off.yw); float jL = mad(0.5, jC.r + jC.b, jC.g);
-    float3 fC = FsrEasuCF(p1 + off.yz); float fL = mad(0.5, fC.r + fC.b, fC.g);
-    float3 eC = FsrEasuCF(p1 + off.xz); float eL = mad(0.5, eC.r + eC.b, eC.g);
-    float3 kC = FsrEasuCF(p2 + off.xw); float kL = mad(0.5, kC.r + kC.b, kC.g);
-    float3 lC = FsrEasuCF(p2 + off.yw); float lL = mad(0.5, lC.r + lC.b, lC.g);
-    float3 hC = FsrEasuCF(p2 + off.yz); float hL = mad(0.5, hC.r + hC.b, hC.g);
-    float3 gC = FsrEasuCF(p2 + off.xz); float gL = mad(0.5, gC.r + gC.b, gC.g);
-    float3 oC = FsrEasuCF(p3 + off.yz); float oL = mad(0.5, oC.r + oC.b, oC.g);
-    float3 nC = FsrEasuCF(p3 + off.xz); float nL = mad(0.5, nC.r + nC.b, nC.g);
+    float3 bC = tex2D(s0, p0 + off.xw).rgb; float bL = mad(0.5, bC.r + bC.b, bC.g);
+    float3 cC = tex2D(s0, p0 + off.yw).rgb; float cL = mad(0.5, cC.r + cC.b, cC.g);
+    float3 iC = tex2D(s0, p1 + off.xw).rgb; float iL = mad(0.5, iC.r + iC.b, iC.g);
+    float3 jC = tex2D(s0, p1 + off.yw).rgb; float jL = mad(0.5, jC.r + jC.b, jC.g);
+    float3 fC = tex2D(s0, p1 + off.yz).rgb; float fL = mad(0.5, fC.r + fC.b, fC.g);
+    float3 eC = tex2D(s0, p1 + off.xz).rgb; float eL = mad(0.5, eC.r + eC.b, eC.g);
+    float3 kC = tex2D(s0, p2 + off.xw).rgb; float kL = mad(0.5, kC.r + kC.b, kC.g);
+    float3 lC = tex2D(s0, p2 + off.yw).rgb; float lL = mad(0.5, lC.r + lC.b, lC.g);
+    float3 hC = tex2D(s0, p2 + off.yz).rgb; float hL = mad(0.5, hC.r + hC.b, hC.g);
+    float3 gC = tex2D(s0, p2 + off.xz).rgb; float gL = mad(0.5, gC.r + gC.b, gC.g);
+    float3 oC = tex2D(s0, p3 + off.yz).rgb; float oL = mad(0.5, oC.r + oC.b, oC.g);
+    float3 nC = tex2D(s0, p3 + off.xz).rgb; float nL = mad(0.5, nC.r + nC.b, nC.g);
 
     //------------------------------------------------------------------------------------------------------------------------------
     // Simplest multi-channel approximate luma possible (luma times 2, in 2 FMA/MAD).
@@ -247,15 +234,15 @@ void FsrEasuF(
     FsrEasuTapF(aC, aW, float2(0, -1) - pp, dir, len2, lob, clp, bC);
     FsrEasuTapF(aC, aW, float2(1, -1) - pp, dir, len2, lob, clp, cC);
     FsrEasuTapF(aC, aW, float2(-1, 1) - pp, dir, len2, lob, clp, iC);
-    FsrEasuTapF(aC, aW, float2(0, 1) - pp, dir, len2, lob, clp, jC);
-    FsrEasuTapF(aC, aW, float2(0, 0) - pp, dir, len2, lob, clp, fC);
+    FsrEasuTapF(aC, aW, float2(0, 1)  - pp, dir, len2, lob, clp, jC);
+    FsrEasuTapF(aC, aW, float2(0, 0)  - pp, dir, len2, lob, clp, fC);
     FsrEasuTapF(aC, aW, float2(-1, 0) - pp, dir, len2, lob, clp, eC);
-    FsrEasuTapF(aC, aW, float2(1, 1) - pp, dir, len2, lob, clp, kC);
-    FsrEasuTapF(aC, aW, float2(2, 1) - pp, dir, len2, lob, clp, lC);
-    FsrEasuTapF(aC, aW, float2(2, 0) - pp, dir, len2, lob, clp, hC);
-    FsrEasuTapF(aC, aW, float2(1, 0) - pp, dir, len2, lob, clp, gC);
-    FsrEasuTapF(aC, aW, float2(1, 2) - pp, dir, len2, lob, clp, oC);
-    FsrEasuTapF(aC, aW, float2(0, 2) - pp, dir, len2, lob, clp, nC);
+    FsrEasuTapF(aC, aW, float2(1, 1)  - pp, dir, len2, lob, clp, kC);
+    FsrEasuTapF(aC, aW, float2(2, 1)  - pp, dir, len2, lob, clp, lC);
+    FsrEasuTapF(aC, aW, float2(2, 0)  - pp, dir, len2, lob, clp, hC);
+    FsrEasuTapF(aC, aW, float2(1, 0)  - pp, dir, len2, lob, clp, gC);
+    FsrEasuTapF(aC, aW, float2(1, 2)  - pp, dir, len2, lob, clp, oC);
+    FsrEasuTapF(aC, aW, float2(0, 2)  - pp, dir, len2, lob, clp, nC);
     //------------------------------------------------------------------------------------------------------------------------------
     // Normalize and dering.
     pix = min(max4, max(min4, aC / aW));
@@ -267,7 +254,7 @@ float4 BufferA(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_
     float4 con0, con1, con2, con3;
 
     // "rendersize" refers to size of source image before upscaling.
-    float2 rendersize = float2(1920, 1080);
+    float2 rendersize = float2(BUFFER_WIDTH, BUFFER_HEIGHT);
     FsrEasuCon(con0, con1, con2, con3, rendersize, rendersize, float2(BUFFER_WIDTH, BUFFER_HEIGHT));
     FsrEasuF(c, texcoord, con0, con1, con2, con3);
     return float4(c.xyz, 1);
@@ -316,14 +303,7 @@ float3 FsrRcasF(
 
     // Noise detection.
     float nz = mad(.25, bL + dL + fL + hL, -eL);
-    nz = clamp(
-        abs(nz)
-        / (
-            max(max(bL, dL), max(eL, max(fL, hL)))
-            - min(min(bL, dL), min(eL, min(fL, hL)))
-            ),
-        0., 1.
-    );
+    nz = clamp(abs(nz) / (max(max(bL, dL), max(eL, max(fL, hL))) - min(min(bL, dL), min(eL, min(fL, hL)))), 0., 1.);
     nz = mad(-.5, nz, 1.);
     // Min and max of ring.
     float3 mn4 = min(b, min(f, h));
@@ -334,10 +314,7 @@ float3 FsrRcasF(
     float3 hitMin = mn4 / (4. * mx4);
     float3 hitMax = (peakC.x - mx4) / mad(4., mn4, peakC.y);
     float3 lobeRGB = max(-hitMin, hitMax);
-    float lobe = max(
-        -FSR_RCAS_LIMIT,
-        min(max(lobeRGB.r, max(lobeRGB.g, lobeRGB.b)), 0.)
-    ) * con;
+    float lobe = max(-FSR_RCAS_LIMIT, min(max(lobeRGB.r, max(lobeRGB.g, lobeRGB.b)), 0.)) * con;
 
     // Resolve, which needs the medium precision rcp approximation to avoid visible tonality changes.
     return mad(lobe, b + d + h + f, e) / mad(4., lobe, 1.);
@@ -355,19 +332,32 @@ float4 FSR(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
     return float4(col, 1.0);
 }
 
+// For testing / debugging
+float4 BasicPS(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{
+    return tex2D(s0, texcoord);
+}
+
+float4 BasicPS2(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
+{
+    return tex2D(BufferASampler, texcoord);
+}
+
 technique FSRTechnique < enabled = true; >
 {
 	pass BufferAPass
 	{
 		VertexShader = FullscreenTriangle;
-		PixelShader  = BufferA;
+		//PixelShader  = BufferA; // maybe recursion?
+        PixelShader = BasicPS;
 		RenderTarget = BufferATex;
 	}
 
 	pass SuperResPass
 	{
 		VertexShader = FullscreenTriangle;
-		PixelShader  = FSR;
+		//PixelShader  = FSR;
+        PixelShader = BasicPS2;
 	}
 }
 
