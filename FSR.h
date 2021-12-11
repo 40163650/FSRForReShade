@@ -254,7 +254,7 @@ float4 BufferA(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_
     float4 con0, con1, con2, con3;
 
     // "rendersize" refers to size of source image before upscaling.
-    float2 rendersize = float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+    float2 rendersize = float2(1920, 1080);
     FsrEasuCon(con0, con1, con2, con3, rendersize, rendersize, float2(BUFFER_WIDTH, BUFFER_HEIGHT));
     FsrEasuF(c, texcoord, con0, con1, con2, con3);
     return float4(c.xyz, 1);
@@ -262,11 +262,11 @@ float4 BufferA(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_
 
 //---------------------------------------------------------------------- BufferA END / FSR MAIN
 
-#define FSR_RCAS_LIMIT (0.25-(1.0/16.0))
+#define FSR_RCAS_LIMIT (0.25 - (1.0 / 16.0))
 
 float4 FsrRcasLoadF(float2 p)
 {
-    return tex2D(BufferASampler, p / float2(3840.0, 2160.0));
+    return tex2D(BufferASampler, p / float2(BUFFER_WIDTH, BUFFER_HEIGHT));
 }
 
 // The scale is {0.0 := maximum, to N>0, where N is the number of stops (halving) of the reduction of sharpness}.
@@ -356,8 +356,8 @@ technique FSRTechnique < enabled = true; >
 	pass SuperResPass
 	{
 		VertexShader = FullscreenTriangle;
-		//PixelShader  = FSR;
-        PixelShader = BasicPS2;
+		PixelShader  = FSR;
+        //PixelShader = BasicPS2;
 	}
 }
 
