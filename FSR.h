@@ -17,7 +17,7 @@ texture BufferATex < pooled = true; >
 sampler BufferASampler
 {
 	Texture = BufferATex;
-	AddressU = Clamp; AddressV = Clamp;
+	AddressU = Repeat; AddressV = Repeat;
 	MipFilter = Linear; MinFilter = Linear; MagFilter = Linear;
 	SRGBTexture = false;
 };
@@ -253,10 +253,12 @@ float4 BufferA(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_
     float3 c;
     float4 con0, con1, con2, con3;
 
+    float2 fragcoord = texcoord * float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+
     // "rendersize" refers to size of source image before upscaling.
     float2 rendersize = float2(1920, 1080);
     FsrEasuCon(con0, con1, con2, con3, rendersize, rendersize, float2(BUFFER_WIDTH, BUFFER_HEIGHT));
-    FsrEasuF(c, texcoord, con0, con1, con2, con3);
+    FsrEasuF(c, fragcoord, con0, con1, con2, con3);
     return float4(c.xyz, 1);
 }
 
@@ -303,6 +305,7 @@ float3 FsrRcasF(
 
     // Noise detection.
     float nz = mad(.25, bL + dL + fL + hL, -eL);
+
     nz = clamp(abs(nz) / (max(max(bL, dL), max(eL, max(fL, hL))) - min(min(bL, dL), min(eL, min(fL, hL)))), 0., 1.);
     nz = mad(-.5, nz, 1.);
     // Min and max of ring.
@@ -326,21 +329,11 @@ float4 FSR(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Targ
     float sharpness = 0.2;
     float con = FsrRcasCon(sharpness);
 
+    float2 fragcoord = texcoord * float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+
     // Perform RCAS pass
-    float3 col = FsrRcasF(texcoord, con);
-
+    float3 col = FsrRcasF(fragcoord, con);
     return float4(col, 1.0);
-}
-
-// For testing / debugging
-float4 BasicPS(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-    return tex2D(s0, texcoord);
-}
-
-float4 BasicPS2(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
-{
-    return tex2D(BufferASampler, texcoord);
 }
 
 technique FSRTechnique < enabled = true; >
@@ -348,8 +341,7 @@ technique FSRTechnique < enabled = true; >
 	pass BufferAPass
 	{
 		VertexShader = FullscreenTriangle;
-		//PixelShader  = BufferA; // maybe recursion?
-        PixelShader = BasicPS;
+		PixelShader  = BufferA;
 		RenderTarget = BufferATex;
 	}
 
@@ -357,7 +349,6 @@ technique FSRTechnique < enabled = true; >
 	{
 		VertexShader = FullscreenTriangle;
 		PixelShader  = FSR;
-        //PixelShader = BasicPS2;
 	}
 }
 
