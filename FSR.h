@@ -373,7 +373,7 @@ float3 FSRPS(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Ta
 	return FSR(BufferASampler, texcoord);
 }
 
-technique BufferATechnique < enabled = false; >
+technique BufferATechnique < enabled = true; >
 {
 	pass BufferAPass
 	{
