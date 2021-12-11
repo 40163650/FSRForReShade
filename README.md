@@ -5,4 +5,4 @@ Based on goingdigital's shadertoy shader: https://www.shadertoy.com/view/stXSWB
 
 It's essentially a conversion from glsl to hlsl with a few multiply-adds thrown in to reduce instructions.
 
-Not yet working. Designed with SweetFX 2.0 + ReShade. Something may need to be changed for it to work with newer versions.
+Designed with SweetFX 2.0 + ReShade. Something may need to be changed for it to work with newer versions.
