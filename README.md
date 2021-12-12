@@ -8,3 +8,5 @@ It's essentially a conversion from glsl to hlsl with a few multiply-adds thrown 
 Designed with SweetFX 2.0 + ReShade. Something may need to be changed for it to work with newer versions.
 
 Downscales the output from the game, then upscales it again.
+
+Pictures: https://imgur.com/a/3X6slyJ
