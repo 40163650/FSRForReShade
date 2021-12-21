@@ -21,12 +21,14 @@ Required:
 - In "SweetFX/SweetFX_Settings.txt" add the line `#define USE_FSR 1` after the use custom line
 - In "SweetFX/Shaders/Main.h" add the following code after custom:
 
-`  /*-----------------------.
+```
+/*-----------------------.
   | ::        FSR       :: |
   '-----------------------*/
 #if (USE_FSR == 1)
 	#include "SweetFX\Shaders\FSR.h"
-#endif`
+#endif
+```
 
 Optional:
 
